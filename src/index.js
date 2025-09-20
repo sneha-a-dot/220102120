@@ -1,17 +1,58 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// index.js
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const Url = require('./models/Url');
+const Log = require('./middleware/log');
+const app = express();
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+app.use(cors());
+app.use(express.json());
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Generate random shortcode helper
+function generateShortcode(length = 6) {
+  let result = '';
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+app.post('/api/shorten', async (req, res) => {
+  try {
+    const { originalUrl, validity } = req.body;
+    if (!originalUrl) {
+      await Log('backend', 'error', 'API', 'Missing originalUrl');
+      return res.status(400).json({ error: 'Original URL is required' });
+    }
+    const expireMinutes = validity || 30;
+    let code;
+    let exists;
+
+    // Keep generating until unique (in rare case of collision)
+    do {
+      code = generateShortcode();
+      exists = await Url.findOne({ shortcode: code });
+    } while (exists);
+
+    const expiresAt = new Date(Date.now() + expireMinutes * 60000);
+    const newUrl = new Url({ originalUrl, shortcode: code, expiresAt });
+    await newUrl.save();
+
+    await Log('backend', 'info', 'API', `Created shortcode ${code} for ${originalUrl}`);
+
+    res.json({ shortcode: code, expiresAt });
+  } catch (err) {
+    await Log('backend', 'fatal', 'API', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});

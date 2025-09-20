@@ -1,43 +1,490 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modern URL Shortener Form</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Reset and layout */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 800px;
+      width: 100%;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow:
+        0 10px 25px rgba(0,0,0,0.15),
+        0 15px 40px rgba(0,0,0,0.1);
+      color: #222;
+      margin: 1rem;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: #333;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+    
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, #7c3aed, #5b21b6);
+      border-radius: 2px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #444;
+      font-size: 1rem;
+    }
+    
+    .input-with-icon {
+      position: relative;
+    }
+    
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7c3aed;
+      font-size: 1.1rem;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1.2rem 0.75rem 2.8rem;
+      font-size: 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      transition: all 0.35s ease;
+      outline-offset: 2px;
+      outline-color: transparent;
+      background-color: #f8fafc;
+    }
+    
+    .form-control:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.25);
+      outline-color: #7c3aed;
+      color: #111;
+      background-color: #fff;
+    }
+    
+    .form-control::placeholder {
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    
+    .form-control.error {
+      border-color: #e53e3e;
+      box-shadow: 0 0 8px rgba(229, 62, 62, 0.25);
+    }
+    
+    .error-message {
+      color: #e53e3e;
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .form-hint {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.8rem;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+    
+    button {
+      background: #7c3aed;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.85rem 2.2rem;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    button:hover {
+      background: #6d28d9;
+      box-shadow: 0 6px 12px rgba(109, 40, 217, 0.35);
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      background: #c4b5fd;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s ease infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .results {
+      margin-top: 2.5rem;
+      padding: 1.5rem;
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #334155;
+      display: none;
+    }
+    
+    .results.visible {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .results h3 {
+      color: #7c3aed;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    
+    .results a {
+      display: inline-block;
+      text-decoration: none;
+      font-weight: 600;
+      color: #6d28d9;
+      background: #ede9fe;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      margin: 0.5rem 0;
+      transition: all 0.2s ease;
+      word-break: break-all;
+    }
+    
+    .results a:hover {
+      text-decoration: underline;
+      background: #ddd6fe;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(109, 40, 217, 0.15);
+    }
+    
+    .results p {
+      margin: 0.5rem 0;
+    }
+    
+    .copy-btn {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+      transition: background 0.2s ease;
+    }
+    
+    .copy-btn:hover {
+      background: #6d28d9;
+    }
+    
+    .url-container {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.8rem;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .buttons {
+        justify-content: center;
+      }
+      
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .form-control {
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+      }
+      
+      .input-with-icon i {
+        left: 12px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <h1>Shorten Your URL</h1>
+    <form id="urlForm" novalidate>
+      <div class="form-group">
+        <label for="url">Original URL</label>
+        <div class="input-with-icon">
+          <i class="fas fa-link"></i>
+          <input type="url" id="url" name="url" class="form-control" placeholder="https://example.com" required />
+        </div>
+        <div class="error-message" id="urlError"></div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="validity">Validity (minutes)</label>
+          <div class="input-with-icon">
+            <i class="fas fa-clock"></i>
+            <input type="number" id="validity" name="validity" class="form-control" placeholder="30" min="1" />
+          </div>
+          <div class="form-hint">Leave empty for default (30 minutes)</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="shortcode">Custom Shortcode (optional)</label>
+          <div class="input-with-icon">
+            <i class="fas fa-pen"></i>
+            <input type="text" id="shortcode" name="shortcode" class="form-control" placeholder="my-link" pattern="[a-zA-Z0-9]{3,10}" />
+          </div>
+          <div class="form-hint">3-10 alphanumeric characters</div>
+          <div class="error-message" id="shortcodeError"></div>
+        </div>
+      </div>
+      
+      <div class="buttons">
+        <button type="submit" id="shortenBtn">
+          <i class="fas fa-compress-alt"></i>
+          <span>Shorten URL</span>
+        </button>
+      </div>
+    </form>
+    
+    <section class="results" id="results" aria-live="polite"></section>
+  </main>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <script>
+    const form = document.getElementById('urlForm');
+    const resultsEl = document.getElementById('results');
+    const shortenBtn = document.getElementById('shortenBtn');
+    const urlError = document.getElementById('urlError');
+    const shortcodeError = document.getElementById('shortcodeError');
+    const urlInput = document.getElementById('url');
+    const shortcodeInput = document.getElementById('shortcode');
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    // Validate URL in real-time
+    urlInput.addEventListener('input', () => {
+      if (urlInput.validity.valid) {
+        urlInput.classList.remove('error');
+        urlError.textContent = '';
+      }
+    });
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    // Validate shortcode in real-time
+    shortcodeInput.addEventListener('input', () => {
+      if (!shortcodeInput.value || shortcodeInput.validity.valid) {
+        shortcodeInput.classList.remove('error');
+        shortcodeError.textContent = '';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let isValid = true;
+      
+      // Reset errors
+      urlError.textContent = '';
+      shortcodeError.textContent = '';
+      urlInput.classList.remove('error');
+      shortcodeInput.classList.remove('error');
+      
+      // Validate URL
+      if (!urlInput.value.trim()) {
+        urlError.textContent = 'Please enter a URL';
+        urlInput.classList.add('error');
+        isValid = false;
+      } else if (!isValidUrl(urlInput.value.trim())) {
+        urlError.textContent = 'Please enter a valid URL (include http:// or https://)';
+        urlInput.classList.add('error');
+        isValid = false;
+      }
+      
+      // Validate shortcode if provided
+      if (shortcodeInput.value && !/^[a-zA-Z0-9]{3,10}$/.test(shortcodeInput.value)) {
+        shortcodeError.textContent = 'Shortcode must be 3-10 alphanumeric characters';
+        shortcodeInput.classList.add('error');
+        isValid = false;
+      }
+      
+      if (!isValid) return;
+      
+      // Show loading state
+      shortenBtn.innerHTML = '<span class="loading"></span> Processing...';
+      shortenBtn.disabled = true;
+      
+      const url = urlInput.value.trim();
+      const validity = document.getElementById('validity').value.trim() || '30';
+      const shortcode = shortcodeInput.value.trim();
+
+      try {
+        const response = await fetch('http://localhost:5000/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ originalUrl: url, validity: Number(validity), shortcode }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultsEl.innerHTML = `
+            <h3>Your shortened URL</h3>
+            <div class="url-container">
+              <a href="http://localhost:5000/${data.shortcode}" target="_blank" rel="noopener noreferrer">
+                http://localhost:5000/${data.shortcode}
+              </a>
+              <button class="copy-btn" onclick="copyToClipboard('http://localhost:5000/${data.shortcode}')">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <p><i class="fas fa-clock"></i> Expires at: ${new Date(data.expiresAt).toLocaleString()}</p>
+            <p><i class="fas fa-link"></i> Original URL: ${url}</p>
+          `;
+          resultsEl.classList.add('visible');
+        } else {
+          alert(data.error || 'An error occurred while shortening the URL.');
+        }
+      } catch (err) {
+        alert('Error communicating with the server. Please try again later.');
+        console.error('Request failed:', err);
+      } finally {
+        // Reset button
+        shortenBtn.innerHTML = '<i class="fas fa-compress-alt"></i> <span>Shorten URL</span>';
+        shortenBtn.disabled = false;
+      }
+    });
+
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        // Show feedback that text was copied
+        const copyBtn = event.currentTarget;
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = '#10b981';
+        
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHtml;
+          copyBtn.style.background = '';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+  </script>
+</body>
 </html>
